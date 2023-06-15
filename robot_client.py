@@ -537,13 +537,13 @@ def defender_commands(robot: Robot, message):
 def return_to_goal(robot: Robot, message):
     print("OUR_GOAL")
     if (robot.bearing_to_our_goal < 180-15) and (robot.bearing_to_our_goal >= 90):
-        turn_backleft(robot, message)
+        turn_backleft(robot, message, (180 - robot.bearing_to_our_goal) / 180)
     elif (robot.bearing_to_our_goal > -180+15) and (robot.bearing_to_our_goal <= -90):
-        turn_backright(robot, message)
+        turn_backright(robot, message, (180 + robot.bearing_to_our_goal) / 180)
     elif (robot.bearing_to_our_goal > 15) and (robot.bearing_to_our_goal < 90):
-        turn_right(robot, message)
+        turn_right(robot, message, robot.bearing_to_our_goal / 180)
     elif (robot.bearing_to_our_goal < -15) and (robot.bearing_to_our_goal > -90):
-        turn_left(robot, message)
+        turn_left(robot, message, -robot.bearing_to_our_goal / 180)
     elif (robot.bearing_to_our_goal <= 15) and (robot.bearing_to_our_goal >= -15):
         go_forward(robot, message)
     else:
@@ -597,12 +597,12 @@ def go_forward(robot: Robot, message):
     message["set_motor_speeds"]["right"] = robot.MAX_SPEED
 
 
-def turn_backleft(robot: Robot, message):
-    turn_left(Robot, message)
+def turn_backleft(robot: Robot, message, magnitude):
+    turn_left(robot, message, magnitude)
 
 
-def turn_backright(robot: Robot, message):
-    turn_right(Robot, message)
+def turn_backright(robot: Robot, message, magnitude):
+    turn_right(robot, message, magnitude)
 
 
 def go_backward(robot: Robot, message):

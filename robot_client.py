@@ -245,11 +245,9 @@ async def send_commands(robot):
 # Robot states to use in the example controller. Feel free to change.
 class RobotState(Enum):
     IDLE = 0
-    STOP = 1
+    START = 1
 
     #DEFENDER
-    DEF_IDLE = IDLE
-    DEF_STOP = STOP
     DEF_FACE_ENEMIES = 2
     DEF_TO_BALL = 3
     DEF_TO_OUR_GOAL = 4
@@ -257,13 +255,11 @@ class RobotState(Enum):
     DEF_INTERCEPT = 7
 
     #MID
-    MID_IDLE = IDLE
-    MID_STOP = STOP
     MID_TO_BALL = 8
     MID_TO_THEIR_BOUND = 9
-    MID_MIMICBALL = 10
-    MID_TO_OURBAND = 11
-    MID_OURBAND_DEF = 12
+    MID_MIMIC_BALL = 10
+    MID_TO_OUR_BOUND = 11
+    MID_INTERCEPT = 12
 
     #ATT
     
@@ -303,7 +299,7 @@ class Robot:
         self.battery_percentage = 0
 
         # These are used by the example behaviour. Feel free to change.
-        self.state = RobotState.STOP
+        self.state = RobotState.START
         self.turn_time = time.time()
         self.regroup_time = time.time()
 
@@ -516,31 +512,46 @@ async def get_data(robot):
 
 
 def midfield_commands(robot: Robot, message):
-    if(robot.state == RobotState.MID_STOP):
-        robot.state = RobotState.MID_MIMICBALL
+    if robot.state == RobotState.START:
+        robot.state = RobotState.MID_TO_BALL
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
 
     if(robot.state == RobotState.MID_TO_BALL):
-        pass
-    if(robot.state == RobotState.IDLE):
+        if not is_ball_in_front(robot):
+            robot.state = RobotState.MID_TO_OUR_BOUND
+        elif robot.progress_through_zone > 0.95:
+            robot.state = RobotState.MID_MIMIC_BALL
+        #print("TOBALL")
+        #print(ball_Pos2Robot(robot.bearing_to_ball))
+        go_to_ball(robot, message)
+
+    if(robot.state == RobotState.MID_TO_OUR_BOUND):
+        if robot.progress_through_zone <= 0.05:
+            robot.state = RobotState.IDLE
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
     
-    if(robot.state == RobotState.MID_TO_THEIR_BOUND):
-        pass
+    if robot.state == RobotState.MID_MIMIC_BALL:
+        if not is_ball_in_front(robot):
+            robot.state = RobotState.MID_TO_OUR_BOUND
 
-    if(robot.state == RobotState.MID_MIMICBALL):
-        mimic_ball(robot, message)
+    if robot.state == RobotState.MID_INTERCEPT:
+        intercept_mid_field(robot, message)
 
-    if(robot.state == RobotState.MID_TO_OURBAND):
-        pass
+    if robot.state == RobotState.IDLE:
+        if is_ball_in_front(robot):
+            robot.state = RobotState.MID_TO_BALL
+        message["set_motor_speeds"]["left"] = 0
+        message["set_motor_speeds"]["right"] = 0
 
-    if(robot.state == RobotState.MID_OURBAND_DEF):
-        pass
 
-
-
+def is_ball_in_front(robot: Robot):
+    if math.cos(robot.bearing_to_their_goal - robot.bearing_to_ball) >= 0:
+        return True
+    else:
+        return False
+    
 
 
 # DEFENDER
@@ -561,12 +572,12 @@ def defender_commands(robot: Robot, message):
     elif robot.state == RobotState.DEF_FACE_ENEMIES:
         face_forward(robot, message)
 
-    elif robot.state == RobotState.DEF_STOP:
+    elif robot.state == RobotState.START:
         robot.state = RobotState.DEF_TO_OUR_GOAL
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
 
-    elif robot.state == RobotState.DEF_IDLE:
+    elif robot.state == RobotState.IDLE:
         if robot.distance_to_ball <= 0.3:
             robot.state = RobotState.DEF_TO_BALL
         message["set_motor_speeds"]["left"] = 0
@@ -642,10 +653,29 @@ def face_forward(robot: Robot, message):
     else:
         robot.state = RobotState.DEF_IDLE
 
+def intercept_mid_field(robot: Robot, message):
+    target_bearing = robot.bearing_to_ball
+    for key, value in robot.neighbours.items():
+        if value["team"] != robot.team and value["role"] == "MID_FIELD":
+            target_bearing = (robot.bearing_to_ball + value["bearing"]) / 2
+            if abs(robot.bearing_to_ball - value["bearing"]) > 180:
+                target_bearing = angles.normalize(target_bearing+180, -180, 180)
+            print("hello friend", key, value)
+            print(target_bearing)
+
+    if abs(target_bearing) < 20:
+        go_forward(robot, message)
+    elif target_bearing > 0:
+        turn_right(robot, message, target_bearing / 180)
+    else:
+        turn_left(robot, message, -target_bearing / 180)
+
 
 def intercept_ball(robot: Robot, message):
     target_bearing = (robot.bearing_to_ball + robot.bearing_to_our_goal) / 2
-    if target_bearing < 20:
+    if abs(robot.bearing_to_ball - robot.bearing_to_our_goal) > 180:
+        target_bearing = angles.normalize(target_bearing+180, -180, 180)
+    if abs(target_bearing) < 20:
         go_forward(robot, message)
     elif target_bearing > 0:
         turn_right(robot, message, target_bearing / 180)

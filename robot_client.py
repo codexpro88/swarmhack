@@ -244,6 +244,7 @@ async def send_commands(robot):
 
 # Robot states to use in the example controller. Feel free to change.
 class RobotState(Enum):
+    #DEFENDER
     IDLE = 1
     FACE_ENEMIES = 2
     TO_BALL = 3
@@ -251,6 +252,13 @@ class RobotState(Enum):
     TO_THEIR_GOAL = 5
     STOP = 6
     INTERCEPT = 7
+    #MID
+    MID_IDLE = IDLE
+    MID_TO_BALL = 8
+    MID_TO_AB = 9
+    MID_TO_MIDDLE = 10
+    MID_TO_DEFEND = 11
+    
 
 # Main Robot class to keep track of robot states
 
@@ -500,6 +508,7 @@ async def get_data(robot):
 
 
 def midfield_commands(robot: Robot, message):
+
     pass
 
 

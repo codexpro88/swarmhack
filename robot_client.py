@@ -227,7 +227,10 @@ async def send_commands(robot):
         # message["set_motor_speeds"] = {}
         # message["set_motor_speeds"]["left"] = left
         # message["set_motor_speeds"]["right"] = right
-        defender_commands(robot, message)
+        if robot.role == "DEFENDER":
+            defender_commands(robot, message)
+        elif robot.role == "MID_FIELD":
+            midfield_commands(robot, message)
 
         # Send command message
         await robot.connection.send(json.dumps(message))
@@ -495,9 +498,12 @@ async def get_data(robot):
     except Exception as e:
         print(f"{type(e).__name__}: {e}")
 
+
+def midfield_commands(robot: Robot, message):
+    pass
+
+
 # DEFENDER
-
-
 def defender_commands(robot: Robot, message):
     print("Enemy bearing", robot.bearing_to_their_goal)
     if robot.state == RobotState.TO_OUR_GOAL:

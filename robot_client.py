@@ -493,7 +493,7 @@ async def get_data(robot):
 def defender_commands(robot: Robot, message):
     print("Enemy bearing", robot.bearing_to_their_goal)
     if robot.state == RobotState.TO_OUR_GOAL:
-        if robot.distance_to_ball <= 0.4 and robot.progress_through_zone < 0.6:
+        if robot.distance_to_ball <= 0.3 and robot.progress_through_zone < 0.6:
             robot.state = RobotState.INTERCEPT
         elif robot.distance_to_our_goal <= 0.05:
             robot.state = RobotState.FACE_ENEMIES
@@ -513,7 +513,7 @@ def defender_commands(robot: Robot, message):
         message["set_motor_speeds"]["right"] = 0
 
     elif robot.state == RobotState.IDLE:
-        if robot.distance_to_ball <= 0.4:
+        if robot.distance_to_ball <= 0.3:
             robot.state = RobotState.TO_BALL
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
@@ -527,9 +527,9 @@ def defender_commands(robot: Robot, message):
 def return_to_goal(robot: Robot, message):
     print("OUR_GOAL")
     if robot.bearing_to_our_goal > 15:
-        turn_right(robot, message)
+        turn_right(robot, message, robot.bearing_to_our_goal / 180)
     elif robot.bearing_to_our_goal < -15:
-        turn_left(robot, message)
+        turn_left(robot, message, -robot.bearing_to_our_goal / 180)
     else:
         go_forward(robot, message)
 
@@ -539,17 +539,17 @@ def go_to_ball(robot: Robot, message):
     if abs(robot.bearing_to_ball) < 20:
         go_forward(robot, message)
     elif robot.bearing_to_ball > 0:
-        turn_right(robot, message)
+        turn_right(robot, message, robot.bearing_to_ball / 180)
     else:
-        turn_left(robot, message)
+        turn_left(robot, message, -robot.bearing_to_ball / 180)
 
 
 def face_forward(robot: Robot, message):
     print("FORWARDS")
     if robot.bearing_to_their_goal < -15:
-        turn_left(robot, message)
+        turn_left(robot, message, -robot.bearing_to_ball / 180)
     elif robot.bearing_to_their_goal > 15:
-        turn_right(robot, message)
+        turn_right(robot, message, robot.bearing_to_ball / 180)
     else:
         robot.state = RobotState.IDLE
 
@@ -559,19 +559,21 @@ def intercept_ball(robot: Robot, message):
     if target_bearing < 20:
         go_forward(robot, message)
     elif target_bearing > 0:
-        turn_right(robot, message)
+        turn_right(robot, message, target_bearing / 180)
     else:
-        turn_left(robot, message)
+        turn_left(robot, message, -target_bearing / 180)
 
 
 
-def turn_right(robot: Robot, message):
-    message["set_motor_speeds"]["left"] = int(float(robot.MAX_SPEED) / 1.4)
-    message["set_motor_speeds"]["right"] = -int(float(robot.MAX_SPEED) / 1.4)
+def turn_right(robot: Robot, message, magnitude):
+    ratio = 1.4 * magnitude + 2 * (1-magnitude)
+    message["set_motor_speeds"]["left"] = int(float(robot.MAX_SPEED) / ratio)
+    message["set_motor_speeds"]["right"] = -int(float(robot.MAX_SPEED) / ratio)
 
-def turn_left(robot: Robot, message):
-    message["set_motor_speeds"]["left"] = -int(float(robot.MAX_SPEED) / 1.4)
-    message["set_motor_speeds"]["right"] = int(float(robot.MAX_SPEED) / 1.4)
+def turn_left(robot: Robot, message, magnitude):
+    ratio = 1.4 * magnitude + 2 * (1-magnitude)
+    message["set_motor_speeds"]["left"] = -int(float(robot.MAX_SPEED) / ratio)
+    message["set_motor_speeds"]["right"] = int(float(robot.MAX_SPEED) / ratio)
 
 def go_forward(robot: Robot, message):
     message["set_motor_speeds"]["left"] = robot.MAX_SPEED

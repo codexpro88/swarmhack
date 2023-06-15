@@ -566,12 +566,14 @@ def intercept_ball(robot: Robot, message):
 
 
 def turn_right(robot: Robot, message):
-    message["set_motor_speeds"]["left"] = int(float(robot.MAX_SPEED) / 1.4)
-    message["set_motor_speeds"]["right"] = -int(float(robot.MAX_SPEED) / 1.4)
+    target_bearing = (robot.bearing_to_ball + robot.bearing_to_our_goal) / 2
+    message["set_motor_speeds"]["left"] = int(float(robot.MAX_SPEED) / (1.4 + ((0.6 / 180) * abs(target_bearing))))
+    message["set_motor_speeds"]["right"] = -int(float(robot.MAX_SPEED) / (1.4 + ((0.6 / 180) * abs(target_bearing))))
 
 def turn_left(robot: Robot, message):
-    message["set_motor_speeds"]["left"] = -int(float(robot.MAX_SPEED) / 1.4)
-    message["set_motor_speeds"]["right"] = int(float(robot.MAX_SPEED) / 1.4)
+    target_bearing = (robot.bearing_to_ball + robot.bearing_to_our_goal) / 2
+    message["set_motor_speeds"]["left"] = -int(float(robot.MAX_SPEED) / (1.4 + ((0.6 / 180) * abs(target_bearing))))
+    message["set_motor_speeds"]["right"] = int(float(robot.MAX_SPEED) / (1.4 + ((0.6 / 180) * abs(target_bearing))))
 
 def go_forward(robot: Robot, message):
     message["set_motor_speeds"]["left"] = robot.MAX_SPEED

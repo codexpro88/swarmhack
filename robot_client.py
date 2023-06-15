@@ -522,6 +522,11 @@ def midfield_commands(robot: Robot, message):
         message["set_motor_speeds"]["right"] = 0
 
     if(robot.state == RobotState.MID_TO_BALL):
+        if (robot.progress_through_zone > 0.95) or (robot.progress_through_zone < 0.05):
+            robot.state = RobotState.MID_OURBAND_DEF
+        #print("TOBALL")
+        #print(ball_Pos2Robot(robot.bearing_to_ball))
+        go_to_ball(robot, message)
         pass
     
     if(robot.state == RobotState.MID_TO_THEIR_BOUND):
@@ -534,10 +539,17 @@ def midfield_commands(robot: Robot, message):
         pass
 
     if(robot.state == RobotState.MID_OURBAND_DEF):
+        message["set_motor_speeds"]["left"] = 0
+        message["set_motor_speeds"]["right"] = 0
         pass
 
 
-
+def ball_Pos2Robot(angle):
+    if math.cos(angle) >= 0:
+        return True
+    else:
+        return False
+    
 
 
 # DEFENDER

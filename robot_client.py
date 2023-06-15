@@ -231,7 +231,8 @@ async def send_commands(robot):
             defender_commands(robot, message)
         elif robot.role == "MID_FIELD":
             midfield_commands(robot, message)
-
+        elif robot.role == "ATTACKER":
+            attacker_commands(robot, message)
         # Send command message
         await robot.connection.send(json.dumps(message))
 
@@ -248,21 +249,24 @@ class RobotState(Enum):
     START = 1
 
     #DEFENDER
-    DEF_FACE_ENEMIES = 2
-    DEF_TO_BALL = 3
-    DEF_TO_OUR_GOAL = 4
-    DEF_TO_THEIR_GOAL = 5
-    DEF_INTERCEPT = 7
-
+    DEF_FACE_ENEMIES    = 2
+    DEF_TO_BALL         = DEF_FACE_ENEMIES + 1
+    DEF_TO_OUR_GOAL     = DEF_TO_BALL + 1
+    DEF_TO_THEIR_GOAL   = DEF_TO_OUR_GOAL + 1
+    DEF_INTERCEPT       = DEF_TO_THEIR_GOAL + 1
+    DEF_END             = DEF_INTERCEPT
     #MID
-    MID_TO_BALL = 8
-    MID_TO_THEIR_BOUND = 9
-    MID_MIMIC_BALL = 10
-    MID_TO_OUR_BOUND = 11
-    MID_INTERCEPT = 12
-
+    MID_TO_BALL           = DEF_END + 1
+    MID_TO_THEIR_BOUND    = MID_TO_BALL + 1
+    MID_MIMIC_BALL        = MID_TO_THEIR_BOUND + 1
+    MID_TO_OUR_BOUND      = MID_MIMIC_BALL + 1
+    MID_INTERCEPT         = MID_TO_OUR_BOUND + 1
+    MID_END               = MID_INTERCEPT
     #ATT
-    
+    ATT_TO_BOUND    = MID_END + 1
+    ATT_TO_BALL     = ATT_TO_BOUND + 1
+    ATT_END         = ATT_TO_BALL
+
 
 # Main Robot class to keep track of robot states
 
@@ -510,6 +514,18 @@ async def get_data(robot):
     except Exception as e:
         print(f"{type(e).__name__}: {e}")
 
+
+def attacker_commands(robot:Robot, message):
+    if robot.state == RobotState.START:
+        pass
+    if(robot.state == RobotState.ATT_TO_BOUND):
+        pass
+
+    if (robot.state ==  RobotState.IDLE):
+        pass
+
+    if(robot.state == RobotState.ATT_TO_BALL):
+        pass
 
 def midfield_commands(robot: Robot, message):
     if robot.state == RobotState.START:

@@ -36,9 +36,10 @@ main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 
 robot_ids = [34]
 
+
 def main_loop():
     # This requests all virtual sensor data from the tracking server for the robots specified in robot_ids
-    # This is stored in the global variable active_robots, a map of id -> instances of the Robot class (defined lower in this file) 
+    # This is stored in the global variable active_robots, a map of id -> instances of the Robot class (defined lower in this file)
     print(Fore.GREEN + "[INFO]: Requesting data from tracking server")
     loop.run_until_complete(get_server_data())
 
@@ -59,14 +60,16 @@ def main_loop():
     time.sleep(0.1)
 
 
-
 """
 This is an example of a behaviour. You will want to replace this with a behaviour that implements your team
 movements. It currently is an example of basic object avoidance.
 This function is called for each robot that we listed in robot_ids that we are interested in.
 """
+
+
 async def send_commands(robot):
-    print(f"Commanding robot {robot.id}: Team {robot.team}, Role {robot.role}, Orientation {robot.orientation}")
+    print(
+        f"Commanding robot {robot.id}: Team {robot.team}, Role {robot.role}, Orientation {robot.orientation}")
 
     """
     robot.neighbours is a map of all the other robots (i.e. not this one) 
@@ -149,15 +152,15 @@ async def send_commands(robot):
         #     robot.turn_time = time.time()
         #     robot.state = RobotState.FORWARDS
 
-        #In the regroup state, they try to group back together
-        #This is an example of using the robot.neighbours map to set our target direction based on where other robots are.
-        #It will get vectors to all other robots, average the direction, and so move the "middle" of the swarm
+        # In the regroup state, they try to group back together
+        # This is an example of using the robot.neighbours map to set our target direction based on where other robots are.
+        # It will get vectors to all other robots, average the direction, and so move the "middle" of the swarm
         # elif robot.state == RobotState.REGROUP:
         #     message["set_leds_colour"] = "green"
 
         #     target_direction = Vector2D(0, 0) #Create a zero vector to work with
         #     for neighbour_id, neighbour in robot.neighbours.items(): #For every other robot (you probably want to filter this by team/role)
-        #         
+        #
         #         vector_to_neighbour = Vector2D(neighbour["range"] * math.cos(math.radians(neighbour["bearing"])),
         #                                        neighbour["range"] * math.sin(math.radians(neighbour["bearing"])))
 
@@ -187,7 +190,7 @@ async def send_commands(robot):
         #     if abs(robot.bearing_to_ball) < 20:
         #          left = right = robot.MAX_SPEED
         #     elif robot.bearing_to_ball > 0:
-        #         left = int(float(robot.MAX_SPEED)/1.4) #If we do a "full speed turn" then they overshoot. 
+        #         left = int(float(robot.MAX_SPEED)/1.4) #If we do a "full speed turn" then they overshoot.
         #         right = -int(float(robot.MAX_SPEED)/1.4) #A good implementation would turn at a speed based on how misalaigned they are
         #     else:
         #         left = -int(float(robot.MAX_SPEED)/1.4)
@@ -215,7 +218,7 @@ async def send_commands(robot):
         #     if abs(robot.bearing_to_their_goal) < 20:
         #          left = right = robot.MAX_SPEED
         #     elif robot.bearing_to_their_goal > 0:
-        #         left = int(float(robot.MAX_SPEED)/1.4) 
+        #         left = int(float(robot.MAX_SPEED)/1.4)
         #         right = -int(float(robot.MAX_SPEED)/1.4)
         #     else:
         #         left = -int(float(robot.MAX_SPEED)/1.4)
@@ -233,10 +236,8 @@ async def send_commands(robot):
         print(f"send_commands: {type(e).__name__}: {e}")
 
 
-
-
 # Robot class and structures
-#----------------------------
+# ----------------------------
 
 # Robot states to use in the example controller. Feel free to change.
 class RobotState(Enum):
@@ -249,6 +250,8 @@ class RobotState(Enum):
     INTERCEPT = 7
 
 # Main Robot class to keep track of robot states
+
+
 class Robot:
     # Firmware on both robots accepts wheel velocities between -100 and 100.
     # This limits the controller to fit within that.
@@ -259,15 +262,16 @@ class Robot:
         self.connection = None
         self.tasks = {}
 
-        self.orientation = 0 # Our orientation from "up". 0 to 359
-        self.neighbours = {} # All other robots in the area (see format, above)
-        self.role = 'NOMAD' # Will be NOMAD, DEFENDER, MID_FIELD, STRIKER
-        self.team = 'UNASSIGNED' # Will be UNASSIGNED, RED, BLUE
-        self.remaining_time = 0 # Number of seconds left in the match
+        self.orientation = 0  # Our orientation from "up". 0 to 359
+        # All other robots in the area (see format, above)
+        self.neighbours = {}
+        self.role = 'NOMAD'  # Will be NOMAD, DEFENDER, MID_FIELD, STRIKER
+        self.team = 'UNASSIGNED'  # Will be UNASSIGNED, RED, BLUE
+        self.remaining_time = 0  # Number of seconds left in the match
         self.bearing_to_ball = 0
         self.distance_to_ball = 0
-        #Value between 0 and 1 for your x coordinate in your assigned zone. If < 0 or > 1 you are out of your zone. 1 means furthest from your goal.
-        self.progress_through_zone = 0 
+        # Value between 0 and 1 for your x coordinate in your assigned zone. If < 0 or > 1 you are out of your zone. 1 means furthest from your goal.
+        self.progress_through_zone = 0
 
         self.bearing_to_our_goal = 0
         self.distance_to_our_goal = 0
@@ -285,18 +289,17 @@ class Robot:
         self.regroup_time = time.time()
 
 
-
-#-----------------------------------------------------------------
+# -----------------------------------------------------------------
 # You probably don't need to change anything below here
-#-----------------------------------------------------------------
+# -----------------------------------------------------------------
 
 
-active_robots = {} 
+active_robots = {}
 ids = []
 
 
 # Server address, port details, globals
-#---------------------------------------
+# ---------------------------------------
 server_address = server_york
 server_port = 6000
 robot_port = 6000
@@ -311,19 +314,22 @@ colorama.init(autoreset=True)
 
 # Handle Ctrl+C termination
 # https://stackoverflow.com/questions/2148888/python-trap-all-signals
-#---------------------------------------------------------------------
-SIGNALS_TO_NAMES_DICT = dict((getattr(signal, n), n) \
-    for n in dir(signal) if n.startswith('SIG') and '_' not in n)
+# ---------------------------------------------------------------------
+SIGNALS_TO_NAMES_DICT = dict((getattr(signal, n), n)
+                             for n in dir(signal) if n.startswith('SIG') and '_' not in n)
 # https://github.com/aaugustin/websockets/issues/124
 __kill_now = False
+
 
 def __set_kill_now(signum, frame):
     print('\nReceived signal:', SIGNALS_TO_NAMES_DICT[signum], str(signum))
     global __kill_now
     __kill_now = True
 
+
 signal.signal(signal.SIGINT, __set_kill_now)
 signal.signal(signal.SIGTERM, __set_kill_now)
+
 
 def kill_now() -> bool:
     global __kill_now
@@ -428,7 +434,8 @@ async def get_server_data():
         reply = json.loads(reply_json)
 
         # Filter reply from the server, based on our active robots of interest
-        filtered_reply = {int(k): v for (k, v) in reply.items() if int(k) in active_robots.keys()}
+        filtered_reply = {int(k): v for (k, v) in reply.items()
+                          if int(k) in active_robots.keys()}
         ids = list(filtered_reply.keys())
 
         pprint.PrettyPrinter(indent=4).pprint(reply)
@@ -445,13 +452,12 @@ async def get_server_data():
             active_robots[id].remaining_time = robot["remaining_time"]
             active_robots[id].neighbours = robot["players"]
             active_robots[id].bearing_to_ball = robot["ball"]["bearing"]
-            active_robots[id].distance_to_ball = robot["ball"]["range"]   
-            active_robots[id].progress_through_zone = robot["progress_through_zone"]   
+            active_robots[id].distance_to_ball = robot["ball"]["range"]
+            active_robots[id].progress_through_zone = robot["progress_through_zone"]
             active_robots[id].bearing_to_our_goal = robot["our_goal"]["bearing"]
             active_robots[id].distance_to_our_goal = robot["our_goal"]["range"]
             active_robots[id].bearing_to_their_goal = robot["their_goal"]["bearing"]
             active_robots[id].distance_to_their_goal = robot["their_goal"]["range"]
-              
 
     except Exception as e:
         print(f"get_server_data: {type(e).__name__}: {e}")
@@ -490,6 +496,8 @@ async def get_data(robot):
         print(f"{type(e).__name__}: {e}")
 
 # DEFENDER
+
+
 def defender_commands(robot: Robot, message):
     print("Enemy bearing", robot.bearing_to_their_goal)
     if robot.state == RobotState.TO_OUR_GOAL:
@@ -519,19 +527,27 @@ def defender_commands(robot: Robot, message):
         message["set_motor_speeds"]["right"] = 0
 
     elif robot.state == RobotState.INTERCEPT:
-        bearing_diff = abs(robot.bearing_to_our_goal - robot.bearing_to_ball) % 360 - 180
+        bearing_diff = abs(robot.bearing_to_our_goal -
+                           robot.bearing_to_ball) % 360 - 180
         if bearing_diff > -10 or bearing_diff < 10:
             robot.state = RobotState.TO_BALL
         intercept_ball(robot, message)
 
+
 def return_to_goal(robot: Robot, message):
     print("OUR_GOAL")
-    if robot.bearing_to_our_goal > 15:
-        turn_right(robot, message, robot.bearing_to_our_goal / 180)
-    elif robot.bearing_to_our_goal < -15:
-        turn_left(robot, message, -robot.bearing_to_our_goal / 180)
-    else:
+    if (robot.bearing_to_our_goal < 180-15) and (robot.bearing_to_our_goal >= 90):
+        turn_backleft(robot, message)
+    elif (robot.bearing_to_our_goal > -180+15) and (robot.bearing_to_our_goal <= -90):
+        turn_backright(robot, message)
+    elif (robot.bearing_to_our_goal > 15) and (robot.bearing_to_our_goal < 90):
+        turn_right(robot, message)
+    elif (robot.bearing_to_our_goal < -15) and (robot.bearing_to_our_goal > -90):
+        turn_left(robot, message)
+    elif (robot.bearing_to_our_goal <= 15) and (robot.bearing_to_our_goal >= -15):
         go_forward(robot, message)
+    else:
+        go_backward(robot, message)
 
 
 def go_to_ball(robot: Robot, message):
@@ -564,20 +580,35 @@ def intercept_ball(robot: Robot, message):
         turn_left(robot, message, -target_bearing / 180)
 
 
-
 def turn_right(robot: Robot, message, magnitude):
     ratio = 1.4 * magnitude + 2 * (1-magnitude)
     message["set_motor_speeds"]["left"] = int(float(robot.MAX_SPEED) / ratio)
     message["set_motor_speeds"]["right"] = -int(float(robot.MAX_SPEED) / ratio)
+
 
 def turn_left(robot: Robot, message, magnitude):
     ratio = 1.4 * magnitude + 2 * (1-magnitude)
     message["set_motor_speeds"]["left"] = -int(float(robot.MAX_SPEED) / ratio)
     message["set_motor_speeds"]["right"] = int(float(robot.MAX_SPEED) / ratio)
 
+
 def go_forward(robot: Robot, message):
     message["set_motor_speeds"]["left"] = robot.MAX_SPEED
     message["set_motor_speeds"]["right"] = robot.MAX_SPEED
+
+
+def turn_backleft(robot: Robot, message):
+    turn_left(Robot, message)
+
+
+def turn_backright(robot: Robot, message):
+    turn_right(Robot, message)
+
+
+def go_backward(robot: Robot, message):
+    message["set_motor_speeds"]["left"] = (-1)*robot.MAX_SPEED
+    message["set_motor_speeds"]["right"] = (-1)*robot.MAX_SPEED
+
 
 # Main entry point for robot control client sample code
 if __name__ == "__main__":
@@ -611,5 +642,6 @@ if __name__ == "__main__":
         main_loop()
 
         if kill_now():
-            loop.run_until_complete(stop_robots(robot_ids))  # Kill all robots, even if not visible
+            # Kill all robots, even if not visible
+            loop.run_until_complete(stop_robots(robot_ids))
             break

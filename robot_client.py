@@ -34,7 +34,7 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
-robot_ids = [35]
+robot_ids = [40]
 
 
 def main_loop():
@@ -263,7 +263,7 @@ class RobotState(Enum):
     MID_TO_THEIR_BOUND = 9
     MID_MIMICBALL = 10
     MID_TO_OURBAND = 11
-    MID_OURBAND_DEF = 12 
+    MID_OURBAND_DEF = 12
 
     #ATT
     
@@ -517,18 +517,21 @@ async def get_data(robot):
 
 def midfield_commands(robot: Robot, message):
     if(robot.state == RobotState.MID_STOP):
-        robot.state = RobotState.MID_TO_BALL
+        robot.state = RobotState.MID_MIMICBALL
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
 
     if(robot.state == RobotState.MID_TO_BALL):
         pass
+    if(robot.state == RobotState.IDLE):
+        message["set_motor_speeds"]["left"] = 0
+        message["set_motor_speeds"]["right"] = 0
     
     if(robot.state == RobotState.MID_TO_THEIR_BOUND):
         pass
 
     if(robot.state == RobotState.MID_MIMICBALL):
-        pass
+        mimic_ball(robot, message)
 
     if(robot.state == RobotState.MID_TO_OURBAND):
         pass
@@ -592,6 +595,33 @@ def return_to_goal(robot: Robot, message):
     else:
         go_backward(robot, message)
 
+def mimic_ball(robot: Robot, message):
+    print("MIMICKING")
+    print(robot.progress_through_zone)
+    if robot.progress_through_zone > 0.80 and robot.progress_through_zone < 1:
+        maintain_yaxis(robot, message)
+    if robot.progress_through_zone < 0.8:
+        if abs(robot.bearing_to_their_goal) < 20:
+            go_forward(robot, message)
+        elif robot.bearing_to_their_goal > 0:
+            turn_right(robot, message, robot.bearing_to_their_goal / 180)
+        elif robot.bearing_to_their_goal < 0:
+            turn_left(robot, message, -robot.bearing_to_their_goal / 180)
+    elif robot.progress_through_zone > 1:
+        if abs(robot.bearing_to_our_goal) < 20:
+            go_forward(robot, message)
+        elif robot.bearing_to_our_goal > 0:
+            turn_right(robot, message, robot.bearing_to_our_goal / 180)
+        elif robot.bearing_to_our_goal < 0:
+            turn_left(robot, message, -robot.bearing_to_our_goal / 180)
+
+def maintain_yaxis(robot: Robot, message):
+    if abs(robot.bearing_to_their_goal -90) <20:
+        go_forward(robot, message)
+    elif (robot.bearing_to_their_goal - 90) > 0:
+        turn_right(robot, message, (robot.bearing_to_their_goal -90) / 180)
+    elif (robot.bearing_to_their_goal - 90) < 0:
+        turn_left(robot, message, -(robot.bearing_to_their_goal -90) / 180)
 
 def go_to_ball(robot: Robot, message):
     message["set_leds_colour"] = "yellow"

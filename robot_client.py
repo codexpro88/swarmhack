@@ -34,7 +34,7 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
-robot_ids = [34]
+robot_ids = [35]
 
 
 def main_loop():
@@ -244,14 +244,16 @@ async def send_commands(robot):
 
 # Robot states to use in the example controller. Feel free to change.
 class RobotState(Enum):
+    IDLE = 0
+    STOP = 1
     #DEFENDER
-    IDLE = 1
-    FACE_ENEMIES = 2
-    TO_BALL = 3
-    TO_OUR_GOAL = 4
-    TO_THEIR_GOAL = 5
-    STOP = 6
-    INTERCEPT = 7
+    DEF_IDLE = IDLE
+    DEF_FACE_ENEMIES = 2
+    DEF_TO_BALL = 3
+    DEF_TO_OUR_GOAL = 4
+    DEF_TO_THEIR_GOAL = 5
+    DEF_STOP = STOP
+    DEF_INTERCEPT = 7
     #MID
     MID_IDLE = IDLE
     MID_TO_BALL = 8
@@ -515,37 +517,37 @@ def midfield_commands(robot: Robot, message):
 # DEFENDER
 def defender_commands(robot: Robot, message):
     print("Enemy bearing", robot.bearing_to_their_goal)
-    if robot.state == RobotState.TO_OUR_GOAL:
+    if robot.state == RobotState.DEF_TO_OUR_GOAL:
         if robot.distance_to_ball <= 0.3 and robot.progress_through_zone < 0.6:
-            robot.state = RobotState.INTERCEPT
+            robot.state = RobotState.DEF_INTERCEPT
         elif robot.distance_to_our_goal <= 0.05:
-            robot.state = RobotState.FACE_ENEMIES
+            robot.state = RobotState.DEF_FACE_ENEMIES
         return_to_goal(robot, message)
 
-    elif robot.state == RobotState.TO_BALL:
+    elif robot.state == RobotState.DEF_TO_BALL:
         if robot.progress_through_zone > 0.9:
-            robot.state = RobotState.TO_OUR_GOAL
+            robot.state = RobotState.DEF_TO_OUR_GOAL
         go_to_ball(robot, message)
 
-    elif robot.state == RobotState.FACE_ENEMIES:
+    elif robot.state == RobotState.DEF_FACE_ENEMIES:
         face_forward(robot, message)
 
-    elif robot.state == RobotState.STOP:
-        robot.state = RobotState.TO_OUR_GOAL
+    elif robot.state == RobotState.DEF_STOP:
+        robot.state = RobotState.DEF_TO_OUR_GOAL
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
 
-    elif robot.state == RobotState.IDLE:
+    elif robot.state == RobotState.DEF_IDLE:
         if robot.distance_to_ball <= 0.3:
-            robot.state = RobotState.TO_BALL
+            robot.state = RobotState.DEF_TO_BALL
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
 
-    elif robot.state == RobotState.INTERCEPT:
+    elif robot.state == RobotState.DEF_INTERCEPT:
         bearing_diff = abs(robot.bearing_to_our_goal -
                            robot.bearing_to_ball) % 360 - 180
         if bearing_diff > -10 or bearing_diff < 10:
-            robot.state = RobotState.TO_BALL
+            robot.state = RobotState.DEF_TO_BALL
         intercept_ball(robot, message)
 
 
@@ -582,7 +584,7 @@ def face_forward(robot: Robot, message):
     elif robot.bearing_to_their_goal > 15:
         turn_right(robot, message, robot.bearing_to_ball / 180)
     else:
-        robot.state = RobotState.IDLE
+        robot.state = RobotState.DEF_IDLE
 
 
 def intercept_ball(robot: Robot, message):

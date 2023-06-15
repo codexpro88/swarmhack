@@ -246,20 +246,26 @@ async def send_commands(robot):
 class RobotState(Enum):
     IDLE = 0
     STOP = 1
+
     #DEFENDER
     DEF_IDLE = IDLE
+    DEF_STOP = STOP
     DEF_FACE_ENEMIES = 2
     DEF_TO_BALL = 3
     DEF_TO_OUR_GOAL = 4
     DEF_TO_THEIR_GOAL = 5
-    DEF_STOP = STOP
     DEF_INTERCEPT = 7
+
     #MID
     MID_IDLE = IDLE
+    MID_STOP = STOP
     MID_TO_BALL = 8
-    MID_TO_AB = 9
-    MID_TO_MIDDLE = 10
-    MID_TO_DEFEND = 11
+    MID_TO_THEIR_BOUND = 9
+    MID_MIMICBALL = 10
+    MID_TO_OURBAND = 11
+    MID_OURBAND_DEF = 12 
+
+    #ATT
     
 
 # Main Robot class to keep track of robot states
@@ -510,8 +516,28 @@ async def get_data(robot):
 
 
 def midfield_commands(robot: Robot, message):
+    if(robot.state == RobotState.MID_STOP):
+        robot.state = RobotState.DEF_TO_OUR_GOAL
+        message["set_motor_speeds"]["left"] = 0
+        message["set_motor_speeds"]["right"] = 0
 
-    pass
+    if(robot.state == RobotState.MID_TO_BALL):
+        pass
+    
+    if(robot.state == RobotState.MID_TO_THEIR_BOUND):
+        pass
+
+    if(robot.state == RobotState.MID_MIMICBALL):
+        pass
+
+    if(robot.state == RobotState.MID_TO_OURBAND):
+        pass
+
+    if(robot.state == RobotState.MID_OURBAND_DEF):
+        pass
+
+
+
 
 
 # DEFENDER

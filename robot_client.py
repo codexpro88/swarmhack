@@ -517,7 +517,7 @@ async def get_data(robot):
 
 def midfield_commands(robot: Robot, message):
     if(robot.state == RobotState.MID_STOP):
-        robot.state = RobotState.DEF_TO_OUR_GOAL
+        robot.state = RobotState.MID_TO_BALL
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
 

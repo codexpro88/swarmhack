@@ -526,13 +526,18 @@ def defender_commands(robot: Robot, message):
 
 def return_to_goal(robot: Robot, message):
     print("OUR_GOAL")
-    if robot.bearing_to_our_goal > 15:
+    if (robot.bearing_to_our_goal < 180-15) and (robot.bearing_to_our_goal >= 90):
+        turn_backleft(robot, message)
+    elif (robot.bearing_to_our_goal > -180+15) and (robot.bearing_to_our_goal <= -90):
+        turn_backright(robot,message)
+    elif (robot.bearing_to_our_goal > 15) and (robot.bearing_to_our_goal < 90):
         turn_right(robot, message)
-    elif robot.bearing_to_our_goal < -15:
+    elif (robot.bearing_to_our_goal < -15) and (robot.bearing_to_our_goal > -90):
         turn_left(robot, message)
-    else:
+    elif (robot.bearing_to_our_goal <= 15) and (robot.bearing_to_our_goal >= -15):
         go_forward(robot, message)
-
+    else:
+        go_backward(robot, message)
 
 def go_to_ball(robot: Robot, message):
     message["set_leds_colour"] = "yellow"
@@ -576,6 +581,16 @@ def turn_left(robot: Robot, message):
 def go_forward(robot: Robot, message):
     message["set_motor_speeds"]["left"] = robot.MAX_SPEED
     message["set_motor_speeds"]["right"] = robot.MAX_SPEED
+
+def turn_backleft(robot:Robot, message):
+    turn_left(Robot, message)
+
+def turn_backright(robot:Robot, message):
+    turn_right(Robot, message)
+
+def go_backward(robot: Robot, message):
+    message["set_motor_speeds"]["left"] = (-1)*robot.MAX_SPEED
+    message["set_motor_speeds"]["right"] = (-1)*robot.MAX_SPEED   
 
 # Main entry point for robot control client sample code
 if __name__ == "__main__":

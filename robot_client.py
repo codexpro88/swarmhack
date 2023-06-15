@@ -264,6 +264,7 @@ class RobotState(Enum):
     MID_MIMICBALL = 10
     MID_TO_OURBAND = 11
     MID_OURBAND_DEF = 12 
+    MID_INTERCEPT = 13
 
     #ATT
     
@@ -516,8 +517,8 @@ async def get_data(robot):
 
 
 def midfield_commands(robot: Robot, message):
-    if(robot.state == RobotState.MID_STOP):
-        robot.state = RobotState.MID_TO_BALL
+    if robot.state == RobotState.MID_STOP:
+        robot.state = RobotState.MID_INTERCEPT
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
 
@@ -529,19 +530,22 @@ def midfield_commands(robot: Robot, message):
         go_to_ball(robot, message)
         pass
     
-    if(robot.state == RobotState.MID_TO_THEIR_BOUND):
+    if robot.state == RobotState.MID_TO_THEIR_BOUND:
         pass
 
-    if(robot.state == RobotState.MID_MIMICBALL):
+    if robot.state == RobotState.MID_MIMICBALL:
         pass
 
-    if(robot.state == RobotState.MID_TO_OURBAND):
+    if robot.state == RobotState.MID_TO_OURBAND:
         pass
 
     if(robot.state == RobotState.MID_OURBAND_DEF):
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
         pass
+
+    if robot.state == RobotState.MID_INTERCEPT:
+        intercept_mid_field(robot, message)
 
 
 def ball_Pos2Robot(angle):
@@ -624,10 +628,29 @@ def face_forward(robot: Robot, message):
     else:
         robot.state = RobotState.DEF_IDLE
 
+def intercept_mid_field(robot: Robot, message):
+    target_bearing = robot.bearing_to_ball
+    for key, value in robot.neighbours.items():
+        if value["team"] != robot.team and value["role"] == "MID_FIELD":
+            target_bearing = (robot.bearing_to_ball + value["bearing"]) / 2
+            if abs(robot.bearing_to_ball - value["bearing"]) > 180:
+                target_bearing = angles.normalize(target_bearing+180, -180, 180)
+            print("hello friend", key, value)
+            print(target_bearing)
+
+    if abs(target_bearing) < 20:
+        go_forward(robot, message)
+    elif target_bearing > 0:
+        turn_right(robot, message, target_bearing / 180)
+    else:
+        turn_left(robot, message, -target_bearing / 180)
+
 
 def intercept_ball(robot: Robot, message):
     target_bearing = (robot.bearing_to_ball + robot.bearing_to_our_goal) / 2
-    if target_bearing < 20:
+    if abs(robot.bearing_to_ball - robot.bearing_to_our_goal) > 180:
+        target_bearing = angles.normalize(target_bearing+180, -180, 180)
+    if abs(target_bearing) < 20:
         go_forward(robot, message)
     elif target_bearing > 0:
         turn_right(robot, message, target_bearing / 180)

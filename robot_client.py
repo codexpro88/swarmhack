@@ -691,9 +691,18 @@ def go_to_ball(robot: Robot, message):
         turn_left(robot, message, -robot.bearing_to_ball / 180)
 
 def go_to_ball_back(robot: Robot, message):
-    if(robot.bearing_to_ball)
-
-    pass
+    if (robot.bearing_to_ball < 180-15) and (robot.bearing_to_ball >= 90):
+        turn_backleft(robot, message, (180 - robot.bearing_to_ball) / 180)
+    elif (robot.bearing_to_ball > -180+15) and (robot.bearing_to_ball <= -90):
+        turn_backright(robot, message, (180 + robot.bearing_to_ball) / 180)
+    elif (robot.bearing_to_ball > 15) and (robot.bearing_to_ball < 90):
+        turn_right(robot, message, robot.bearing_to_ball / 180)
+    elif (robot.bearing_to_ball < -15) and (robot.bearing_to_ball > -90):
+        turn_left(robot, message, -robot.bearing_to_ball / 180)
+    elif (robot.bearing_to_ball <= 15) and (robot.bearing_to_ball >= -15):
+        go_forward(robot, message)
+    else:
+        go_backward(robot, message)
 
 def face_forward(robot: Robot, message):
     print("FORWARDS")

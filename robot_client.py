@@ -526,7 +526,7 @@ def striker_commands(robot:Robot, message):
         if  is_ball_in_front(robot):
             robot.state = RobotState.ATT_TO_BALL
         elif robot.progress_through_zone > 0.2:
-            isleft = math.sin(robot.bearing_to_ball) >= 0
+            isleft = math.sin(math.radians(robot.bearing_to_ball)) >= 0
             print("Is Left \n\n\n\n\n\n\n\n\n\n\n\n\n\n", isleft)
             message["set_motor_speeds"]["left"] = 0
             message["set_motor_speeds"]["right"] = 0
@@ -563,7 +563,7 @@ def midfield_commands(robot: Robot, message):
         if  is_ball_in_front(robot):
             robot.state = RobotState.MID_TO_BALL
         elif robot.progress_through_zone > 0.2:
-            isleft = math.sin(robot.bearing_to_ball) >= 0
+            isleft = math.sin(math.radians(robot.bearing_to_ball)) >= 0
             print("Is Left \n\n\n\n\n\n\n\n\n\n\n\n\n\n", isleft)
             message["set_motor_speeds"]["left"] = 0
             message["set_motor_speeds"]["right"] = 0
@@ -695,7 +695,7 @@ def go_to_ball_in_front(robot: Robot, message):
     message["set_leds_colour"] = "yellow"
     bearing = robot.bearing_to_ball
     diff_bearings = robot.bearing_to_their_goal - robot.bearing_to_ball
-    bearing -= diff_bearings
+    bearing -= 0.5 * diff_bearings
     bearing = angles.normalize(bearing, -180, 180)
 
     if abs(bearing) < 10:

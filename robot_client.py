@@ -34,7 +34,8 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
-robot_ids = [33]
+robot_ids = [38]
+
 
 def main_loop():
     # This requests all virtual sensor data from the tracking server for the robots specified in robot_ids
@@ -525,8 +526,6 @@ def striker_commands(robot:Robot, message):
     if robot.state ==  RobotState.IDLE:
         if is_ball_in_front(robot):
             robot.state = RobotState.ATT_TO_BALL
-        message["set_motor_speeds"]["left"] = 0
-        message["set_motor_speeds"]["right"] = 0
 
     if robot.state == RobotState.ATT_TO_BALL:
         if not is_ball_in_front(robot):
@@ -647,7 +646,7 @@ def return_to_goal(robot: Robot, message):
 def mimic_ball(robot: Robot, message):
     print("MIMICKING")
     print(robot.progress_through_zone)
-    if robot.progress_through_zone > 0.80 and robot.progress_through_zone < 1:
+    if robot.progress_through_zone > 0.8 and robot.progress_through_zone < 1:
         maintain_yaxis(robot, message)
     if robot.progress_through_zone < 0.8:
         if abs(robot.bearing_to_ball) < 20:
@@ -665,7 +664,7 @@ def mimic_ball(robot: Robot, message):
             turn_left(robot, message, -robot.bearing_to_our_goal / 180)
 
 def maintain_yaxis(robot: Robot, message):
-    if abs(robot.bearing_to_their_goal -90) < 10:
+    if abs(robot.orientation - 90) < 10:
         if robot.bearing_to_ball < 90 and robot.bearing_to_ball > 0:
             go_forward(robot, message)
         elif robot.bearing_to_ball > 90 and robot.bearing_to_ball < 180:  
@@ -674,10 +673,10 @@ def maintain_yaxis(robot: Robot, message):
             go_forward(robot, message)
         elif robot.bearing_to_ball < -90 and robot.bearing_to_ball > -180:
             go_backward(robot, message)
-    elif (robot.bearing_to_their_goal - 90) > 0:
-        turn_right(robot, message, (robot.bearing_to_their_goal -90) / 180)
-    elif (robot.bearing_to_their_goal - 90) < 0:
-        turn_left(robot, message, -(robot.bearing_to_their_goal -90) / 180)
+    elif (robot.orientation - 90) > 0:
+        turn_right(robot, message, (robot.orientation -90) / 180)
+    elif (robot.orientation - 90) < 0:
+        turn_left(robot, message, -(robot.orientation -90) / 180)
 
 def go_to_ball_in_front(robot: Robot, message):
     message["set_leds_colour"] = "yellow"

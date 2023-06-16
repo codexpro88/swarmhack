@@ -34,7 +34,7 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
-robot_ids = [34, 36, 32]
+robot_ids = [36]
 
 
 def main_loop():
@@ -530,7 +530,7 @@ def striker_commands(robot:Robot, message):
             print("Is Left \n\n\n\n\n\n\n\n\n\n\n\n\n\n", isleft)
             message["set_motor_speeds"]["left"] = 0
             message["set_motor_speeds"]["right"] = 0
-            go_to_ball_back(robot, message, True)
+            go_to_ball_back(robot, message, isleft)
         else:
             # Mimic with gap or Correct
             print("IDLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
@@ -567,7 +567,7 @@ def midfield_commands(robot: Robot, message):
             print("Is Left \n\n\n\n\n\n\n\n\n\n\n\n\n\n", isleft)
             message["set_motor_speeds"]["left"] = 0
             message["set_motor_speeds"]["right"] = 0
-            go_to_ball_back(robot, message, True)
+            go_to_ball_back(robot, message, isleft)
         else:
             # Mimic with gap or Correct
             print("IDLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
@@ -597,7 +597,7 @@ def is_ball_in_front(robot: Robot):
     else:
         forwards_angle = -angles.normalize(robot.orientation - 180, -180, 180)
 
-    if math.cos(angles.d2r(forwards_angle - robot.bearing_to_ball)) >= -0.2:
+    if math.cos(angles.d2r(forwards_angle - robot.bearing_to_ball)) >= -0.1:
         return True
     else:
         return False
@@ -608,7 +608,7 @@ def is_ball_in_front(robot: Robot):
 def defender_commands(robot: Robot, message):
     print("Enemy bearing", robot.bearing_to_their_goal)
     if robot.state == RobotState.DEF_TO_OUR_GOAL:
-        if robot.distance_to_ball <= 0.3 and robot.progress_through_zone < 0.6:
+        if robot.distance_to_ball <= 0.5 and robot.progress_through_zone < 0.6:
             robot.state = RobotState.DEF_INTERCEPT
         elif robot.distance_to_our_goal <= 0.05:
             robot.state = RobotState.DEF_FACE_ENEMIES
@@ -628,7 +628,7 @@ def defender_commands(robot: Robot, message):
         message["set_motor_speeds"]["right"] = 0
 
     elif robot.state == RobotState.IDLE:
-        if robot.distance_to_ball <= 0.4:
+        if robot.distance_to_ball <= 0.5:
             robot.state = RobotState.DEF_TO_BALL
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0

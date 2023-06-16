@@ -34,11 +34,7 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
-<<<<<<< Updated upstream
-robot_ids = [32]
-=======
 robot_ids = [39]
->>>>>>> Stashed changes
 
 
 def main_loop():
@@ -235,8 +231,8 @@ async def send_commands(robot):
             defender_commands(robot, message)
         elif robot.role == "MID_FIELD":
             midfield_commands(robot, message)
-        elif robot.role == "ATTACKER":
-            attacker_commands(robot, message)
+        elif robot.role == "STRIKER":
+            striker_commands(robot, message)
         print("BALL!!!!!!                                                                                ", is_ball_in_front(robot))
         # Send command message
         await robot.connection.send(json.dumps(message))
@@ -520,17 +516,21 @@ async def get_data(robot):
         print(f"{type(e).__name__}: {e}")
 
 
-def attacker_commands(robot:Robot, message):
+def striker_commands(robot:Robot, message):
     if robot.state == RobotState.START:
-        pass
-    if(robot.state == RobotState.ATT_TO_BOUND):
-        pass
+        robot.state = RobotState.ATT_TO_BOUND
+    if robot.state == RobotState.ATT_TO_BOUND:
+        if robot.progress_through_zone < 0.1:
+            robot.state = RobotState.IDLE
 
-    if (robot.state ==  RobotState.IDLE):
-        pass
+    if robot.state ==  RobotState.IDLE:
+        if is_ball_in_front(robot):
+            robot.state = RobotState.ATT_TO_BALL
 
-    if(robot.state == RobotState.ATT_TO_BALL):
-        pass
+    if robot.state == RobotState.ATT_TO_BALL:
+        if not is_ball_in_front(robot):
+            robot.state = RobotState.ATT_TO_BOUND
+        go_to_ball_in_front(robot, message)
 
 def midfield_commands(robot: Robot, message):
     if robot.state == RobotState.START:
@@ -545,7 +545,7 @@ def midfield_commands(robot: Robot, message):
             robot.state = RobotState.MID_MIMIC_BALL
         #print("TOBALL")
         #print(ball_Pos2Robot(robot.bearing_to_ball))
-        go_to_ball(robot, message)
+        go_to_ball_in_front(robot, message)
 
     if(robot.state == RobotState.MID_TO_OUR_BOUND):
         if robot.progress_through_zone <= 0.05:
@@ -593,7 +593,7 @@ def defender_commands(robot: Robot, message):
     elif robot.state == RobotState.DEF_TO_BALL:
         if robot.progress_through_zone > 0.9:
             robot.state = RobotState.DEF_TO_OUR_GOAL
-        go_to_ball(robot, message)
+        go_to_ball_in_front(robot, message)
 
     elif robot.state == RobotState.DEF_FACE_ENEMIES:
         face_forward(robot, message)
@@ -662,6 +662,19 @@ def maintain_yaxis(robot: Robot, message):
         turn_right(robot, message, (robot.bearing_to_their_goal -90) / 180)
     elif (robot.bearing_to_their_goal - 90) < 0:
         turn_left(robot, message, -(robot.bearing_to_their_goal -90) / 180)
+
+def go_to_ball_in_front(robot: Robot, message):
+    message["set_leds_colour"] = "yellow"
+    bearing = robot.bearing_to_ball
+    diff_bearings = robot.bearing_to_their_goal - robot.bearing_to_ball
+    bearing -= diff_bearings * 0.2
+
+    if abs(robot.bearing_to_ball) < 20:
+        go_forward(robot, message)
+    elif robot.bearing_to_ball > 0:
+        turn_right(robot, message, robot.bearing_to_ball / 180)
+    else:
+        turn_left(robot, message, -robot.bearing_to_ball / 180)
 
 def go_to_ball(robot: Robot, message):
     message["set_leds_colour"] = "yellow"

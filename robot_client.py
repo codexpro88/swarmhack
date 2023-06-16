@@ -34,7 +34,7 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
-robot_ids = [32]
+robot_ids = [33]
 
 def main_loop():
     # This requests all virtual sensor data from the tracking server for the robots specified in robot_ids
@@ -556,7 +556,7 @@ def midfield_commands(robot: Robot, message):
             print("Is Left \n\n\n\n\n\n\n\n\n\n\n\n\n\n", isleft)
             message["set_motor_speeds"]["left"] = 0
             message["set_motor_speeds"]["right"] = 0
-            #go_to_ball_back(robot, message, True)
+            go_to_ball_back(robot, message, True)
         else:
             # Mimic with gap or Correct
             print("IDLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
@@ -616,7 +616,7 @@ def defender_commands(robot: Robot, message):
         message["set_motor_speeds"]["right"] = 0
 
     elif robot.state == RobotState.IDLE:
-        if robot.distance_to_ball <= 0.3:
+        if robot.distance_to_ball <= 0.4:
             robot.state = RobotState.DEF_TO_BALL
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
@@ -683,7 +683,7 @@ def go_to_ball_in_front(robot: Robot, message):
     message["set_leds_colour"] = "yellow"
     bearing = robot.bearing_to_ball
     diff_bearings = robot.bearing_to_their_goal - robot.bearing_to_ball
-    bearing -= diff_bearings * 0.2
+    bearing -= diff_bearings * 0.5
 
     if abs(robot.bearing_to_ball) < 20:
         go_forward(robot, message)
@@ -706,6 +706,7 @@ def go_to_ball_back(robot: Robot, message, isleft):
         robot_bearing = robot.bearing_to_ball + 30
     else:
         robot_bearing = robot.bearing_to_ball - 30
+
     if (robot_bearing < 180-15) and (robot_bearing >= 90):
         turn_backleft(robot, message, (180 - robot_bearing) / 180)
     elif (robot_bearing > -180+15) and (robot_bearing <= -90):

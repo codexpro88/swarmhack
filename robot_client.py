@@ -34,7 +34,7 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
-robot_ids = [40]
+robot_ids = [32]
 
 
 def main_loop():
@@ -233,6 +233,7 @@ async def send_commands(robot):
             midfield_commands(robot, message)
         elif robot.role == "ATTACKER":
             attacker_commands(robot, message)
+        print("BALL!!!!!!                                                                                ", is_ball_in_front(robot))
         # Send command message
         await robot.connection.send(json.dumps(message))
 
@@ -563,7 +564,12 @@ def midfield_commands(robot: Robot, message):
 
 
 def is_ball_in_front(robot: Robot):
-    if math.cos(robot.bearing_to_their_goal - robot.bearing_to_ball) >= 0:
+    if robot.team == "RED" or robot.team == "UNASSIGNED":
+        forwards_angle = -robot.orientation
+    else:
+        forwards_angle = -angles.normalize(robot.orientation - 180, -180, 180)
+
+    if math.cos(angles.d2r(forwards_angle - robot.bearing_to_ball)) >= 0:
         return True
     else:
         return False
@@ -667,7 +673,7 @@ def face_forward(robot: Robot, message):
     elif robot.bearing_to_their_goal > 15:
         turn_right(robot, message, robot.bearing_to_ball / 180)
     else:
-        robot.state = RobotState.DEF_IDLE
+        robot.state = RobotState.IDLE
 
 def intercept_mid_field(robot: Robot, message):
     target_bearing = robot.bearing_to_ball

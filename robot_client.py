@@ -34,8 +34,7 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
-robot_ids = [34]
-
+robot_ids = [32]
 
 def main_loop():
     # This requests all virtual sensor data from the tracking server for the robots specified in robot_ids
@@ -540,7 +539,7 @@ def midfield_commands(robot: Robot, message):
         message["set_motor_speeds"]["left"] = 0
         message["set_motor_speeds"]["right"] = 0
 
-    if(robot.state == RobotState.MID_TO_BALL):
+    if robot.state == RobotState.MID_TO_BALL:
         if not is_ball_in_front(robot):
             robot.state = RobotState.MID_TO_OUR_BOUND
         elif robot.progress_through_zone > 0.95:
@@ -549,12 +548,12 @@ def midfield_commands(robot: Robot, message):
         #print(ball_Pos2Robot(robot.bearing_to_ball))
         go_to_ball_in_front(robot, message)
 
-    if(robot.state == RobotState.MID_TO_OUR_BOUND):
+    if robot.state == RobotState.MID_TO_OUR_BOUND:
         if  is_ball_in_front(robot):
             robot.state = RobotState.MID_TO_BALL
-        elif(robot.progress_through_zone > 0.2):
-            isleft = (math.sin(robot.bearing_to_ball) >=0)
-            print("Is Left \n\n\n\n\n\n\n\n\n\n\n\n\n\n" + isleft)
+        elif robot.progress_through_zone > 0.2:
+            isleft = math.sin(robot.bearing_to_ball) >= 0
+            print("Is Left \n\n\n\n\n\n\n\n\n\n\n\n\n\n", isleft)
             message["set_motor_speeds"]["left"] = 0
             message["set_motor_speeds"]["right"] = 0
             #go_to_ball_back(robot, message, True)

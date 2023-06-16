@@ -34,11 +34,7 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
-<<<<<<< Updated upstream
-robot_ids = [39]
-=======
-robot_ids = [40]
->>>>>>> Stashed changes
+robot_ids = [34]
 
 
 def main_loop():
@@ -554,12 +550,19 @@ def midfield_commands(robot: Robot, message):
         go_to_ball_in_front(robot, message)
 
     if(robot.state == RobotState.MID_TO_OUR_BOUND):
-        if  is_ball_in_front():
+        if  is_ball_in_front(robot):
             robot.state = RobotState.MID_TO_BALL
-        elif(robot.progress_through_zone < 0.1):
-            go_to_ball_back()
+        elif(robot.progress_through_zone > 0.2):
+            isleft = (math.sin(robot.bearing_to_ball) >=0)
+            print("Is Left \n\n\n\n\n\n\n\n\n\n\n\n\n\n" + isleft)
+            message["set_motor_speeds"]["left"] = 0
+            message["set_motor_speeds"]["right"] = 0
+            #go_to_ball_back(robot, message, True)
         else:
             # Mimic with gap or Correct
+            print("IDLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+            message["set_motor_speeds"]["left"] = 0
+            message["set_motor_speeds"]["right"] = 0
             pass
     
     if robot.state == RobotState.MID_MIMIC_BALL:
@@ -699,16 +702,20 @@ def go_to_ball(robot: Robot, message):
     else:
         turn_left(robot, message, -robot.bearing_to_ball / 180)
 
-def go_to_ball_back(robot: Robot, message):
-    if (robot.bearing_to_ball < 180-15) and (robot.bearing_to_ball >= 90):
-        turn_backleft(robot, message, (180 - robot.bearing_to_ball) / 180)
-    elif (robot.bearing_to_ball > -180+15) and (robot.bearing_to_ball <= -90):
-        turn_backright(robot, message, (180 + robot.bearing_to_ball) / 180)
-    elif (robot.bearing_to_ball > 15) and (robot.bearing_to_ball < 90):
-        turn_right(robot, message, robot.bearing_to_ball / 180)
-    elif (robot.bearing_to_ball < -15) and (robot.bearing_to_ball > -90):
-        turn_left(robot, message, -robot.bearing_to_ball / 180)
-    elif (robot.bearing_to_ball <= 15) and (robot.bearing_to_ball >= -15):
+def go_to_ball_back(robot: Robot, message, isleft):
+    if(isleft):
+        robot_bearing = robot.bearing_to_ball + 30
+    else:
+        robot_bearing = robot.bearing_to_ball - 30
+    if (robot_bearing < 180-15) and (robot_bearing >= 90):
+        turn_backleft(robot, message, (180 - robot_bearing) / 180)
+    elif (robot_bearing > -180+15) and (robot_bearing <= -90):
+        turn_backright(robot, message, (180 + robot_bearing) / 180)
+    elif (robot_bearing > 15) and (robot_bearing < 90):
+        turn_right(robot, message,robot_bearing / 180)
+    elif (robot_bearing < -15) and (robot_bearing > -90):
+        turn_left(robot, message, -robot_bearing / 180)
+    elif (robot_bearing <= 15) and (robot_bearing >= -15):
         go_forward(robot, message)
     else:
         go_backward(robot, message)

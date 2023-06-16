@@ -34,7 +34,7 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
-robot_ids = [38]
+robot_ids = [34]
 
 
 def main_loop():
@@ -519,13 +519,24 @@ async def get_data(robot):
 def striker_commands(robot:Robot, message):
     if robot.state == RobotState.START:
         robot.state = RobotState.ATT_TO_BOUND
-    if robot.state == RobotState.ATT_TO_BOUND:
-        if robot.progress_through_zone < 0.1:
-            robot.state = RobotState.IDLE
+        message["set_motor_speeds"]["left"] = 0
+        message["set_motor_speeds"]["right"] = 0
 
-    if robot.state ==  RobotState.IDLE:
-        if is_ball_in_front(robot):
+    if robot.state == RobotState.ATT_TO_BOUND:
+        if  is_ball_in_front(robot):
             robot.state = RobotState.ATT_TO_BALL
+        elif robot.progress_through_zone > 0.2:
+            isleft = math.sin(robot.bearing_to_ball) >= 0
+            print("Is Left \n\n\n\n\n\n\n\n\n\n\n\n\n\n", isleft)
+            message["set_motor_speeds"]["left"] = 0
+            message["set_motor_speeds"]["right"] = 0
+            go_to_ball_back(robot, message, True)
+        else:
+            # Mimic with gap or Correct
+            print("IDLEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+            message["set_motor_speeds"]["left"] = 0
+            message["set_motor_speeds"]["right"] = 0
+        
 
     if robot.state == RobotState.ATT_TO_BALL:
         if not is_ball_in_front(robot):
@@ -584,7 +595,7 @@ def is_ball_in_front(robot: Robot):
     else:
         forwards_angle = -angles.normalize(robot.orientation - 180, -180, 180)
 
-    if math.cos(angles.d2r(forwards_angle - robot.bearing_to_ball)) >= 0:
+    if math.cos(angles.d2r(forwards_angle - robot.bearing_to_ball)) >= -0.2:
         return True
     else:
         return False
@@ -682,14 +693,15 @@ def go_to_ball_in_front(robot: Robot, message):
     message["set_leds_colour"] = "yellow"
     bearing = robot.bearing_to_ball
     diff_bearings = robot.bearing_to_their_goal - robot.bearing_to_ball
-    bearing -= diff_bearings * 0.5
+    bearing -= diff_bearings
+    bearing = angles.normalize(bearing, -180, 180)
 
-    if abs(robot.bearing_to_ball) < 10:
+    if abs(bearing) < 10:
         go_forward(robot, message)
-    elif robot.bearing_to_ball > 0:
-        turn_right(robot, message, robot.bearing_to_ball / 180)
+    elif bearing > 0:
+        turn_right(robot, message, bearing / 180)
     else:
-        turn_left(robot, message, -robot.bearing_to_ball / 180)
+        turn_left(robot, message, bearing / 180)
 
 def go_to_ball(robot: Robot, message):
     message["set_leds_colour"] = "yellow"

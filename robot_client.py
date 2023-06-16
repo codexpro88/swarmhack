@@ -664,7 +664,7 @@ def mimic_ball(robot: Robot, message):
             turn_left(robot, message, -robot.bearing_to_our_goal / 180)
 
 def maintain_yaxis(robot: Robot, message):
-    if abs(robot.orientation - 90) < 10:
+    if abs(robot.orientation + 90) < 10:
         if robot.bearing_to_ball < 90 and robot.bearing_to_ball > 0:
             go_forward(robot, message)
         elif robot.bearing_to_ball > 90 and robot.bearing_to_ball < 180:  
@@ -673,9 +673,9 @@ def maintain_yaxis(robot: Robot, message):
             go_forward(robot, message)
         elif robot.bearing_to_ball < -90 and robot.bearing_to_ball > -180:
             go_backward(robot, message)
-    elif (robot.orientation - 90) > 0:
+    elif (robot.orientation + 90) < 0:
         turn_right(robot, message, (robot.orientation -90) / 180)
-    elif (robot.orientation - 90) < 0:
+    elif (robot.orientation + 90) > 0:
         turn_left(robot, message, -(robot.orientation -90) / 180)
 
 def go_to_ball_in_front(robot: Robot, message):
@@ -684,7 +684,7 @@ def go_to_ball_in_front(robot: Robot, message):
     diff_bearings = robot.bearing_to_their_goal - robot.bearing_to_ball
     bearing -= diff_bearings * 0.5
 
-    if abs(robot.bearing_to_ball) < 20:
+    if abs(robot.bearing_to_ball) < 10:
         go_forward(robot, message)
     elif robot.bearing_to_ball > 0:
         turn_right(robot, message, robot.bearing_to_ball / 180)

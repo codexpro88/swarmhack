@@ -530,6 +530,8 @@ def striker_commands(robot:Robot, message):
     if robot.state ==  RobotState.IDLE:
         if is_ball_in_front(robot):
             robot.state = RobotState.ATT_TO_BALL
+        message["set_motor_speeds"]["left"] = 0
+        message["set_motor_speeds"]["right"] = 0
 
     if robot.state == RobotState.ATT_TO_BALL:
         if not is_ball_in_front(robot):

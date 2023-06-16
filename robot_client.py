@@ -34,7 +34,11 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
+<<<<<<< Updated upstream
 robot_ids = [32]
+=======
+robot_ids = [39]
+>>>>>>> Stashed changes
 
 
 def main_loop():
@@ -634,12 +638,12 @@ def mimic_ball(robot: Robot, message):
     if robot.progress_through_zone > 0.80 and robot.progress_through_zone < 1:
         maintain_yaxis(robot, message)
     if robot.progress_through_zone < 0.8:
-        if abs(robot.bearing_to_their_goal) < 20:
+        if abs(robot.bearing_to_ball) < 20:
             go_forward(robot, message)
-        elif robot.bearing_to_their_goal > 0:
-            turn_right(robot, message, robot.bearing_to_their_goal / 180)
-        elif robot.bearing_to_their_goal < 0:
-            turn_left(robot, message, -robot.bearing_to_their_goal / 180)
+        elif robot.bearing_to_ball > 0:
+            turn_right(robot, message, robot.bearing_to_ball / 180)
+        elif robot.bearing_to_ball < 0:
+            turn_left(robot, message, -robot.bearing_to_ball / 180)
     elif robot.progress_through_zone > 1:
         if abs(robot.bearing_to_our_goal) < 20:
             go_forward(robot, message)
@@ -649,8 +653,11 @@ def mimic_ball(robot: Robot, message):
             turn_left(robot, message, -robot.bearing_to_our_goal / 180)
 
 def maintain_yaxis(robot: Robot, message):
-    if abs(robot.bearing_to_their_goal -90) <20:
-        go_forward(robot, message)
+    if abs(robot.bearing_to_their_goal -90) < 10:
+        if abs(robot.bearing_to_ball) < 90:
+            go_forward(robot, message)
+        elif abs(robot.bearing_to_ball) > 90:  
+            go_backward(robot, message)   
     elif (robot.bearing_to_their_goal - 90) > 0:
         turn_right(robot, message, (robot.bearing_to_their_goal -90) / 180)
     elif (robot.bearing_to_their_goal - 90) < 0:

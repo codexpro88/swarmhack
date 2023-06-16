@@ -548,14 +548,13 @@ def midfield_commands(robot: Robot, message):
         go_to_ball_in_front(robot, message)
 
     if(robot.state == RobotState.MID_TO_OUR_BOUND):
-        if robot.progress_through_zone <= 0.1 and is_ball_in_front():
+        if  is_ball_in_front():
             robot.state = RobotState.MID_TO_BALL
+        elif(robot.progress_through_zone < 0.1):
+            go_to_ball_back()
         else:
-            if(robot.progress_through_zone < 0.1):
-                go_to_ball_back()
-            else:
-                # Mimic with gap
-                pass
+            # Mimic with gap or Correct
+            pass
     
     if robot.state == RobotState.MID_MIMIC_BALL:
         if not is_ball_in_front(robot):
@@ -689,8 +688,9 @@ def go_to_ball(robot: Robot, message):
     else:
         turn_left(robot, message, -robot.bearing_to_ball / 180)
 
-def go_to_ball_back():
-    
+def go_to_ball_back(robot: Robot, message):
+    if(robot.bearing_to_ball)
+
     pass
 
 def face_forward(robot: Robot, message):

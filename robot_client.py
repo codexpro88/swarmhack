@@ -34,7 +34,11 @@ function should be declared with "async" (see the simple_obstacle_avoidance() ex
 main_loop() using loop.run_until_complete(async_thing_to_run(ids))
 """
 
+<<<<<<< Updated upstream
 robot_ids = [39]
+=======
+robot_ids = [40]
+>>>>>>> Stashed changes
 
 
 def main_loop():
@@ -559,6 +563,7 @@ def midfield_commands(robot: Robot, message):
             pass
     
     if robot.state == RobotState.MID_MIMIC_BALL:
+        mimic_ball(robot,message)
         if not is_ball_in_front(robot):
             robot.state = RobotState.MID_TO_OUR_BOUND
 
@@ -659,10 +664,14 @@ def mimic_ball(robot: Robot, message):
 
 def maintain_yaxis(robot: Robot, message):
     if abs(robot.bearing_to_their_goal -90) < 10:
-        if abs(robot.bearing_to_ball) < 90:
+        if robot.bearing_to_ball < 90 and robot.bearing_to_ball > 0:
             go_forward(robot, message)
-        elif abs(robot.bearing_to_ball) > 90:  
-            go_backward(robot, message)   
+        elif robot.bearing_to_ball > 90 and robot.bearing_to_ball < 180:  
+            go_backward(robot, message)
+        elif robot.bearing_to_ball < 0 and robot.bearing_to_ball > -90:
+            go_forward(robot, message)
+        elif robot.bearing_to_ball < -90 and robot.bearing_to_ball > -180:
+            go_backward(robot, message)
     elif (robot.bearing_to_their_goal - 90) > 0:
         turn_right(robot, message, (robot.bearing_to_their_goal -90) / 180)
     elif (robot.bearing_to_their_goal - 90) < 0:
